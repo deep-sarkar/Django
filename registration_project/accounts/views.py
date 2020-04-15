@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 '''
 Errors
 '''
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from smtplib import SMTPException
 
 
@@ -243,8 +243,36 @@ def reset_password(request, surl):
         username = decode['username']
         user = User.objects.get(username=username)
         if user is not None:
-            return redirect('/reset_new_password/' + str(user)+'/')
+            return redirect('/activatenewpassword/' + str(user)+'/')
         else:
             return HttpResponse('Invalid')
     except jwt.DecodeError:
         return HttpResponse('Something went wrong')
+
+
+'''
+Reset and activate new password when usere request for forgot password
+'''
+class ActivateNewPassword(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+
+    def post(self, request, user_reset):
+        new_password = request.data['new_password']
+        new_password_confirm = request.data['new_password_confirm']
+
+        if user_reset is None:
+            return HttpResponse('not a valid user.')
+        if new_password != new_password_confirm :
+            return Response('password must match.')
+        elif len(new_password) < 8 :
+            return HttpResponse('Password must contains atleast 8 letters.')
+        elif re.search('[A-Za-z]', new_password) == None or re.search('[0-9]', new_password) == None:
+            return HttpResponse('Password must contain one alphabet and one number.')
+        else:
+            try:
+                user = User.objects.get(username=user_reset)
+                user.set_password(new_password)
+                user.save()
+                return render(request, 'accounts/reset_password_done.html')
+            except ObjectDoesNotExist:
+                return Response('not a valid user.')

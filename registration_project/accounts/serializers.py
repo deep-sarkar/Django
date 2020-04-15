@@ -39,3 +39,10 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
             'new_password_confirm',
         ]
         required_fields = fields
+
+class EmailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'email'
+        ]

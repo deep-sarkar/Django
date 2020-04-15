@@ -1,0 +1,11 @@
+body {
+    background-color: cadetblue;
+}
+
+section {
+    background-color: beige;
+    height: 20%;
+    width: 30%;
+    margin: auto;
+    padding: 4%;
+}

@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 Errors
 '''
 from django.core.exceptions import ValidationError
+from smtplib import SMTPException
 
 
 '''
@@ -30,7 +31,8 @@ from rest_framework.response import Response
 from rest_framework import permissions, generics
 from rest_framework.renderers import TemplateHTMLRenderer
 
-from .serializers import UserRegisterSerializer, UserLoginSerializer, ResetPasswordSerializer
+from .serializers import ( UserRegisterSerializer, UserLoginSerializer, 
+                            ResetPasswordSerializer, EmailSerializers )
 from .token_handeler import generate_token
 
 import jwt
@@ -99,6 +101,8 @@ class RegisterAPIView(generics.GenericAPIView):
             return HttpResponse("Thankyou for registration. Please verify your email.")
         except ValueError:
             return HttpResponse("Please enter a valid detail.")
+        except SMTPException:
+                return Response('Bad request, please try again later.')
         except Exception:
             return HttpResponse("something went wrong, please try again later.")
         
@@ -187,3 +191,43 @@ def logout(request):
         return HttpResponse('you are successfully logged out from your account')
     except Exception:
         return Response("Something went wrong, please try again later")
+
+'''
+Forgot password view
+'''
+class Forgotpassword(generics.GenericAPIView):
+    serializer_class = EmailSerializers
+
+    def post(self, request):
+        email = request.data['email']
+        if email == "":
+            return Response({'details': 'please enter an email'})
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                return Response({'details': 'not a valid email'})
+            try:
+                user = User.objects.filter(email=email)
+                username = user.values()[0]['username'] #Fetch username still if user is not logedin
+                payload = {
+                        'username': username,
+                        }
+                token = generate_token(payload)
+                current_site = get_current_site(request)
+                domain_name = current_site.domain
+                surl = get_surl(str(token))
+                final_url = surl.split("/")
+                mail_subject = "Reset Your password by clicking below link"
+                msg = render_to_string(
+                    'accounts/reset_password.html',
+                    {
+                        'username': username, 
+                        'domain': domain_name,
+                        'surl': final_url[2],
+                        })
+                send_mail(mail_subject, msg, EMAIL_HOST_USER,
+                        [email], fail_silently=False)
+                return HttpResponse('Please check your email for reset password.')
+            except SMTPException:
+                return Response('Bad request, please try again later.')

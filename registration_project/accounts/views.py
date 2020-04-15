@@ -217,6 +217,9 @@ Forgot password view
 class Forgotpassword(generics.GenericAPIView):
     serializer_class = EmailSerializers
 
+    def get(self, request):
+        return render(request, 'accounts/forgot_password.html')
+
     def post(self, request):
         email = request.data['email']
         if email == "":

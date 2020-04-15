@@ -231,3 +231,20 @@ class Forgotpassword(generics.GenericAPIView):
                 return HttpResponse('Please check your email for reset password.')
             except SMTPException:
                 return Response('Bad request, please try again later.')
+
+'''
+After sending link in mail, on clicking will redirect reset_password
+'''
+def reset_password(request, surl):
+    try:
+        token_object = ShortURL.objects.get(surl=surl)
+        token = token_object.lurl
+        decode = jwt.decode(token, 'SECRET')
+        username = decode['username']
+        user = User.objects.get(username=username)
+        if user is not None:
+            return redirect('/reset_new_password/' + str(user)+'/')
+        else:
+            return HttpResponse('Invalid')
+    except jwt.DecodeError:
+        return HttpResponse('Something went wrong')

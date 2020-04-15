@@ -278,6 +278,9 @@ Reset and activate new password when usere request for forgot password
 class ActivateNewPassword(generics.GenericAPIView):
     serializer_class = ResetPasswordSerializer
 
+    def get(self, request, user_reset):
+        return render(request, 'accounts/changepassword.html')
+
     def post(self, request, user_reset):
         new_password = request.data['new_password']
         new_password_confirm = request.data['new_password_confirm']

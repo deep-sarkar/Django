@@ -135,6 +135,9 @@ class LoginAPIView(generics.GenericAPIView):
     permission_classes     = [permissions.AllowAny]
     serializer_class       = UserLoginSerializer
 
+    def get(self, request):
+        return render(request, 'accounts/login.html')
+
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponse("your are already loged in, please logout first for login again")

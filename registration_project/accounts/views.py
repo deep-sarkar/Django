@@ -71,7 +71,7 @@ class RegisterAPIView(generics.GenericAPIView):
             return HttpResponse('Password must contains atleast 8 letters.')
         elif re.search('[A-Za-z]', password) == None or re.search('[0-9]', password) == None:
             return HttpResponse('Password must contain one alphabet and one number.')
-        else:
+        try:
             user = User.objects.create(username=username,email=email)
             user.set_password(password) 
             user.is_active = False
@@ -96,4 +96,7 @@ class RegisterAPIView(generics.GenericAPIView):
             send_mail(mail_subject, msg, EMAIL_HOST_USER,
                       [email], fail_silently=False,)
             return HttpResponse("Thankyou for registration. Please verify your email.")
-        return HttpResponse("invalid Request") 
+        except ValueError:
+            return HttpResponse("Please enter a valid detail.")
+        except Exception:
+            return HttpResponse("Something went wrong, please try after sometime")

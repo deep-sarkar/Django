@@ -172,20 +172,33 @@ Password reset View
 class ChangePassword(generics.GenericAPIView):
     serializer_class = ResetPasswordSerializer
 
+    def get(self, request):
+        return render(request, 'accounts/changepassword.html')
+
     def post(self, request):
         try:
             username = self.request.user.username
-            new_password = request.data['new_password']
-            new_password_confirm = request.data['new_password_confirm']
-            user_count = User.objects.filter(username=username).count()
-            if new_password == new_password_confirm and user_count == 1:
-                user = User.objects.get(username=username)
-                user.set_password(new_password)
-                user.save()
-                return Response("Password reseted")
-            return Response("please Login First")
-        except Exception:
-            return Response("Something went wrong, please try again later")
+            data = request.data
+            new_password = data.get('new_password')
+            new_password_confirm = data.get('new_password_confirm')
+            # print(new_password)
+            # print(new_password_confirm)
+            if new_password != new_password_confirm :
+                return HttpResponse('password must match.')
+            elif len(new_password) < 8 :
+                return HttpResponse('Password must contains atleast 8 letters.')
+            elif re.search('[A-Za-z]', new_password) == None or re.search('[0-9]', new_password) == None:
+                return HttpResponse('Password must contain one alphabet and one number.')
+            else:
+                user_count = User.objects.filter(username=username).count()
+                if user_count == 1:
+                    user = User.objects.get(username=username)
+                    user.set_password(new_password)
+                    user.save()
+                    return HttpResponse("Password reseted")
+                return HttpResponse("please Login First")
+        except Exception as e:
+            return HttpResponse(e,"Something went wrong, please try again later")
             
 
 '''

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import HttpResponse, redirect, render
 from django.core.validators import validate_email
+from django.contrib.auth.models import auth
 
 from django.template.loader import render_to_string
 
@@ -29,7 +30,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, generics
 from rest_framework.renderers import TemplateHTMLRenderer
 
-from .serializers import UserRegisterSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer
 from .token_handeler import generate_token
 
 import jwt
@@ -122,3 +123,31 @@ def activate(request, surl):
         return HttpResponse("invalid credentials")
     except jwt.DecodeError:
         return HttpResponse("You are trying with old actiation code, please try again later.")
+
+'''
+Login View
+'''
+class LoginAPIView(generics.GenericAPIView):
+    permission_classes     = [permissions.AllowAny]
+    serializer_class       = UserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponse("your are already loged in, please logout first for login again")
+        data = request.data
+        username = data.get('username')
+        password = data.get('password')
+        qs = User.objects.filter(
+            Q(username__iexact=username)|
+            Q(email__iexact=username)
+        )
+        # print(username)
+        # print(password)
+        if qs.count() == 1:
+            user_obj = qs.first()
+            if user_obj.check_password(password):
+                if user_obj.is_active:
+                    auth.login(request, user_obj)
+                    return HttpResponse('loged in')
+                return HttpResponse("Please verify your email first.")
+        return HttpResponse("invalid credentials")

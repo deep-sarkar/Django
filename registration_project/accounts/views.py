@@ -99,4 +99,26 @@ class RegisterAPIView(generics.GenericAPIView):
         except ValueError:
             return HttpResponse("Please enter a valid detail.")
         except Exception:
-            return HttpResponse("Something went wrong, please try after sometime")
+            return HttpResponse("something went wrong, please try again later.")
+        
+
+'''
+Activate account by token
+'''
+def activate(request, surl):
+    try:
+        token_object = ShortURL.objects.get(surl=surl)
+        token = token_object.lurl
+        decode = jwt.decode(token, 'SECRET')
+        username = str(decode['username'])
+        user = User.objects.get(username=username)
+        if user is not None:
+            if user.is_active :
+                return HttpResponse('This user is already activated, Please login')
+            else:
+                user.is_active = True
+                user.save()
+                return HttpResponse('your account is activated,')
+        return HttpResponse("invalid credentials")
+    except jwt.DecodeError:
+        return HttpResponse("You are trying with old actiation code, please try again later.")

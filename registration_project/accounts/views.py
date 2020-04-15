@@ -134,25 +134,27 @@ class LoginAPIView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponse("your are already loged in, please logout first for login again")
-        data = request.data
-        try:
-            username = data.get('username')
-            password = data.get('password')
-            qs = User.objects.filter(
-                Q(username__iexact=username)|
-                Q(email__iexact=username)
-            )
-            # print(username)
-            # print(password)
-            if qs.count() == 1:
-                user_obj = qs.first()
-                if user_obj.check_password(password):
-                    if user_obj.is_active:
-                        auth.login(request, user_obj)
-                        return HttpResponse('loged in')
-                    return HttpResponse("Please verify your email first.")
-        except Exception:
-            return HttpResponse("invalid credentials")
+        else:    
+            try:
+                data = request.data
+                username = data.get('username')
+                password = data.get('password')
+                qs = User.objects.filter(
+                    Q(username__iexact=username)|
+                    Q(email__iexact=username)
+                )
+                # print(username)
+                # print(password)
+                if qs.count() == 1:
+                    user_obj = qs.first()
+                    if user_obj.check_password(password):
+                        if user_obj.is_active:
+                            auth.login(request, user_obj)
+                            return HttpResponse('loged in')
+                        return HttpResponse("Please verify your email first.")
+                return HttpResponse('Please check your detail and try again later.')
+            except Exception:
+                return HttpResponse("Something went wrong, please try again later")
 
 '''
 Password reset View
@@ -171,5 +173,17 @@ class ChangePassword(generics.GenericAPIView):
                 user.set_password(new_password)
                 user.save()
                 return Response("Password reseted")
-        except Exception:
             return Response("please Login First")
+        except Exception:
+            return Response("Something went wrong, please try again later")
+            
+
+'''
+Default logout from auth
+'''
+def logout(request):
+    try:
+        auth.logout(request)
+        return HttpResponse('you are successfully logged out from your account')
+    except Exception:
+        return Response("Something went wrong, please try again later")

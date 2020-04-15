@@ -30,7 +30,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, generics
 from rest_framework.renderers import TemplateHTMLRenderer
 
-from .serializers import UserRegisterSerializer, UserLoginSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, ResetPasswordSerializer
 from .token_handeler import generate_token
 
 import jwt
@@ -135,19 +135,41 @@ class LoginAPIView(generics.GenericAPIView):
         if request.user.is_authenticated:
             return HttpResponse("your are already loged in, please logout first for login again")
         data = request.data
-        username = data.get('username')
-        password = data.get('password')
-        qs = User.objects.filter(
-            Q(username__iexact=username)|
-            Q(email__iexact=username)
-        )
-        # print(username)
-        # print(password)
-        if qs.count() == 1:
-            user_obj = qs.first()
-            if user_obj.check_password(password):
-                if user_obj.is_active:
-                    auth.login(request, user_obj)
-                    return HttpResponse('loged in')
-                return HttpResponse("Please verify your email first.")
-        return HttpResponse("invalid credentials")
+        try:
+            username = data.get('username')
+            password = data.get('password')
+            qs = User.objects.filter(
+                Q(username__iexact=username)|
+                Q(email__iexact=username)
+            )
+            # print(username)
+            # print(password)
+            if qs.count() == 1:
+                user_obj = qs.first()
+                if user_obj.check_password(password):
+                    if user_obj.is_active:
+                        auth.login(request, user_obj)
+                        return HttpResponse('loged in')
+                    return HttpResponse("Please verify your email first.")
+        except Exception:
+            return HttpResponse("invalid credentials")
+
+'''
+Password reset View
+'''
+class ChangePassword(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+
+    def post(self, request):
+        try:
+            username = self.request.user.username
+            new_password = request.data['new_password']
+            new_password_confirm = request.data['new_password_confirm']
+            user_count = User.objects.filter(username=username).count()
+            if new_password == new_password_confirm and user_count == 1:
+                user = User.objects.get(username=username)
+                user.set_password(new_password)
+                user.save()
+                return Response("Password reseted")
+        except Exception:
+            return Response("please Login First")

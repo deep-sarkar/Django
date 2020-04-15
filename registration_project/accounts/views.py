@@ -47,9 +47,12 @@ class RegisterAPIView(generics.GenericAPIView):
     permission_classes     = [permissions.AllowAny]
     serializer_class       = UserRegisterSerializer
 
+    def get(self, request):
+        return render(request, 'accounts/register.html')
+
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return Response("Someone is already logged in, please logout first to register new user.")
+            return HttpResponse("Someone is already logged in, please logout first to register new user.")
         data = request.data
         username    = data.get('username')
         email       = data.get('email')
@@ -69,7 +72,7 @@ class RegisterAPIView(generics.GenericAPIView):
         Password validation
         '''
         if password != password2 :
-            return Response('password must match.')
+            return HttpResponse('password must match.')
         elif len(password) < 8 :
             return HttpResponse('Password must contains atleast 8 letters.')
         elif re.search('[A-Za-z]', password) == None or re.search('[0-9]', password) == None:

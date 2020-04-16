@@ -44,9 +44,9 @@ $(document).on('submit','#registeration_form', function(e){
         success: function(response){
             if (response == 'success')
                 alert('Please verify your account')
-            else if (response == 'password')
+            else if (response == 'check_password')
                 alert('Password must contain atleast 8 words (alphanumeric).')
-            else if ( response == 'exists')
+            else if ( response == 'user_exists')
                 alert("User already exist.")
             else if ( response == 'validated_email')
                 alert("Enter a valid email")

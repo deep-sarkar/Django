@@ -6,11 +6,11 @@
 <li class="links">
     {% if request.user.is_authenticated %}
         <ol><a href="{% url 'changepassword' %}">Change Password</a></ol>
-        <ol><a href="{% url 'forgotpassword' %}">Forgot Password</a></ol>
         <ol><a href="{% url 'logout' %}">Logout</a></ol>
     {% else %}
         <ol><a href="{% url 'login' %}">Login</a></ol>
         <ol><a href="{% url 'register' %}">Signup</a></ol>
+        <ol><a href="{% url 'forgotpassword' %}">Forgot Password</a></ol>
     {% endif %}
     
 </li>

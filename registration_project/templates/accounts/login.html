@@ -17,7 +17,28 @@
       <hr>
       <button type="submit">Log in</button>
     </div>
-    
   </form>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script language="JavaScript" type="text/javascript">
+    $(document).on('submit','#login_form', function(e){
+      e.preventDefault();
+
+      $.ajax({
+        type:'POST',
+        url:"{% url 'login' %}",
+        data:{
+          username:$('#username').val(),
+          password:$('#password').val(),
+          csrfmiddlewaretokken: $('input[name=csrfmiddlewaretokken]').val()
+        },
+        success: function(){
+          alert("You are successfully logged in");
+        },
+        error: function() {
+          alert("Please try again.");              
+        }
+      });
+    });
+</script>
   
 {% endblock content %}

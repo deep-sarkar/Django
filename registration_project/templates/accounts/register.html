@@ -10,21 +10,55 @@
     <p>Hey welcome to my registration portal.</p>
     <hr>
     <label for="username">Username :</label>
-    <input type="text" name="username" required>
+    <input type="text" name="username" id="username" required>
     <br>
     <label for="email">Email :</label>
-    <input type="text" name="email" required>
+    <input type="text" name="email" id="email" required>
     <br>
     <label for="password">Password :</label>
-    <input type="password" name="password" required>
+    <input type="password" name="password" id="password" required>
     <br>
     <label for="password2">Password :</label>
-    <input type="password" name="password2" required>
+    <input type="password" name="password2" id="password2" required>
     <br>
     <button type="submit">Signup</button>
     <hr>
 
 </div>
 </form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).on('submit','#registeration_form', function(e){
+    e.preventDefault();
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'register' %}",
+        data:{
+            username:$('#username').val(),
+            email : $('#email').val(),
+            password : $('#password').val(),
+            password2 : $('#password2').val(),
+            csrfmiddlewaretokken: $('input[name=csrfmiddlewaretokken]').val()
+        },
+        success: function(response){
+            if (response == 'success')
+                alert('Please verify your account')
+            else if (response == 'password')
+                alert('Password must contain atleast 8 words (alphanumeric).')
+            else if ( response == 'exists')
+                alert("User already exist.")
+            else if ( response == 'validated_email')
+                alert("Enter a valid email")
+            else if ( response == 'valueError')
+                alert("Enter valid detail")
+        },
+        error: function(){
+            alert("Server issue.");
+        }
+    });
+});
+
+</script>
 
 {% endblock content %}

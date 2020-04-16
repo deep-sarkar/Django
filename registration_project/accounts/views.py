@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.shortcuts import HttpResponse, redirect, render
 from django.core.validators import validate_email
 from django.contrib.auth.models import auth
-
+from django.views.generic import TemplateView
 from django.template.loader import render_to_string
 
 '''
@@ -29,7 +29,6 @@ from django.db.models import Q
 
 from rest_framework.response import Response
 from rest_framework import permissions, generics
-from rest_framework.renderers import TemplateHTMLRenderer
 
 from .serializers import ( UserRegisterSerializer, UserLoginSerializer, 
                             ResetPasswordSerializer, EmailSerializers )
@@ -39,6 +38,14 @@ import jwt
 import re
 
 User = get_user_model()
+
+
+'''
+Home Page
+'''
+class Home(TemplateView):
+    template_name = "accounts/home.html"
+
 
 '''
 Registration View
@@ -149,18 +156,18 @@ class LoginAPIView(generics.GenericAPIView):
                 data = request.data
                 username = data.get('username')
                 password = data.get('password')
-                qs = User.objects.filter(
+                queryset = User.objects.filter(
                     Q(username__iexact=username)|
                     Q(email__iexact=username)
                 )
                 # print(username)
                 # print(password)
-                if qs.count() == 1:
-                    user_obj = qs.first()
+                if queryset.count() == 1:
+                    user_obj = queryset.first()
                     if user_obj.check_password(password):
                         if user_obj.is_active:
                             auth.login(request, user_obj)
-                            return HttpResponse('loged in')
+                            return Response('success')
                         return HttpResponse("Please verify your email first.")
                 return HttpResponse('Please check your detail and try again later.')
             except Exception:

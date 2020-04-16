@@ -68,22 +68,22 @@ class RegisterAPIView(generics.GenericAPIView):
         try:
             validate_email(email)
         except ValidationError:
-            return HttpResponse('Please enter a valid email and try again later.')
+            return Response('validated_email')
         qs = User.objects.filter(
             Q(username__iexact=username)
         )
         if qs.exists():
-            return HttpResponse('This user already exists.')
+            return HttpResponse('exists')
         
         '''
         Password validation
         '''
         if password != password2 :
-            return HttpResponse('password must match.')
+            return HttpResponse('password')
         elif len(password) < 8 :
-            return HttpResponse('Password must contains atleast 8 letters.')
+            return HttpResponse('password')
         elif re.search('[A-Za-z]', password) == None or re.search('[0-9]', password) == None:
-            return HttpResponse('Password must contain one alphabet and one number.')
+            return HttpResponse('passworda')
         try:
             user = User.objects.create(username=username,email=email)
             user.set_password(password) 
@@ -108,9 +108,9 @@ class RegisterAPIView(generics.GenericAPIView):
                     })
             send_mail(mail_subject, msg, EMAIL_HOST_USER,
                       [email], fail_silently=False,)
-            return HttpResponse("Thankyou for registration. Please verify your email.")
+            return HttpResponse("success")
         except ValueError:
-            return HttpResponse("Please enter a valid detail.")
+            return HttpResponse("valueError")
         except SMTPException:
                 return Response('Bad request, please try again later.')
         except Exception:
@@ -168,8 +168,8 @@ class LoginAPIView(generics.GenericAPIView):
                         if user_obj.is_active:
                             auth.login(request, user_obj)
                             return Response('success')
-                        return HttpResponse("Please verify your email first.")
-                return HttpResponse('Please check your detail and try again later.')
+                        return HttpResponse("verify")
+                return HttpResponse('password')
             except Exception:
                 return HttpResponse("Something went wrong, please try again later")
 

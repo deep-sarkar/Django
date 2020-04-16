@@ -11,6 +11,6 @@ urlpatterns = [
     path('logout/', logout, name='logout'),
     path('forgotpassword/', Forgotpassword.as_view(), name='forgotpassword'),
     path('resetpassword/<surl>/',reset_password, name='resetpassword'),
-    path('activatenewpassword/<user_reset>/',ActivateNewPassword.as_view(),name='activatenewpassword'),
+    path('activatenewpassword/<user_reset>/',ActivateNewPassword.as_view(), name='activatenewpassword'),
     path('', Home.as_view(), name='home'),
 ]

@@ -285,7 +285,7 @@ class ActivateNewPassword(generics.GenericAPIView):
     serializer_class = ResetPasswordSerializer
 
     def get(self, request, user_reset):
-        return render(request, 'accounts/changepassword.html')
+        return render(request, 'accounts/reset_new_password.html')
 
     def post(self, request, user_reset):
         new_password = request.data['new_password']
@@ -294,16 +294,16 @@ class ActivateNewPassword(generics.GenericAPIView):
         if user_reset is None:
             return HttpResponse('not a valid user.')
         if new_password != new_password_confirm :
-            return Response('password must match.')
+            return Response('password_must_match')
         elif len(new_password) < 8 :
             return HttpResponse('Password must contains atleast 8 letters.')
         elif re.search('[A-Za-z]', new_password) == None or re.search('[0-9]', new_password) == None:
-            return HttpResponse('Password must contain one alphabet and one number.')
+            return HttpResponse('enter_valid_password')
         else:
             try:
                 user = User.objects.get(username=user_reset)
                 user.set_password(new_password)
                 user.save()
-                return render(request, 'accounts/reset_password_done.html')
+                return render(request, 'accounts/home.html')
             except ObjectDoesNotExist:
-                return Response('not a valid user.')
+                return HttpResponse('not a valid user.')

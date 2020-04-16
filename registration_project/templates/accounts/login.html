@@ -32,10 +32,15 @@
           csrfmiddlewaretokken: $('input[name=csrfmiddlewaretokken]').val()
         },
         success: function(response) {
-        if (response == 'success') 
-          window.location= "{% url 'home' %}";
-        else 
-          alert("Try again with right data.");       
+            if (response == 'success') 
+              window.location= "{% url 'home' %}"
+            else if (response == 'password')
+              alert('Please enter correct values.')
+            else if (response == 'verify')
+              alert('Please verify your email first.')       
+        },
+        error: function(){
+          alert('Server error!!')
         }
       });
     });

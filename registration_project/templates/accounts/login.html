@@ -34,9 +34,9 @@
         success: function(response) {
             if (response == 'success') 
               window.location= "{% url 'home' %}"
-            else if (response == 'password')
-              alert('Please enter correct values.')
-            else if (response == 'verify')
+            else if (response == 'password_error')
+              alert('Please enter correct password.')
+            else if (response == 'verify_email')
               alert('Please verify your email first.')       
         },
         error: function(){

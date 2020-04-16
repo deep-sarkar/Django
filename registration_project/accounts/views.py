@@ -229,12 +229,12 @@ class Forgotpassword(generics.GenericAPIView):
     def post(self, request):
         email = request.data['email']
         if email == "":
-            return Response({'details': 'please enter an email'})
+            return HttpResponse('enter_email')
         else:
             try:
                 validate_email(email)
             except ValidationError:
-                return Response({'details': 'not a valid email'})
+                return HttpResponse('enter_valid_email')
             try:
                 user = User.objects.filter(email=email)
                 username = user.values()[0]['username'] #Fetch username still if user is not logedin
@@ -256,7 +256,7 @@ class Forgotpassword(generics.GenericAPIView):
                         })
                 send_mail(mail_subject, msg, EMAIL_HOST_USER,
                         [email], fail_silently=False)
-                return HttpResponse('Please check your email for reset password.')
+                return HttpResponse('success')
             except SMTPException:
                 return Response('Bad request, please try again later.')
 

@@ -79,11 +79,11 @@ class RegisterAPIView(generics.GenericAPIView):
         Password validation
         '''
         if password != password2 :
-            return HttpResponse('check_password')
+            return HttpResponse('password_not_matched')
         elif len(password) < 8 :
             return HttpResponse('check_password')
         elif re.search('[A-Za-z]', password) == None or re.search('[0-9]', password) == None:
-            return HttpResponse('check_passworda')
+            return HttpResponse('check_password')
         try:
             user = User.objects.create(username=username,email=email)
             user.set_password(password) 

@@ -34,10 +34,15 @@ from .serializers import ( UserRegisterSerializer, UserLoginSerializer,
                             ResetPasswordSerializer, EmailSerializers )
 from .token_handeler import generate_token
 
+#Custom redis cache
+from .redis_cache import Redis
+
 import jwt
 import re
 
 User = get_user_model()
+redis_object = Redis()
+
 
 
 '''
@@ -166,6 +171,10 @@ class LoginAPIView(generics.GenericAPIView):
                     user_obj = queryset.first()
                     if user_obj.check_password(password):
                         if user_obj.is_active:
+                            payload = {
+                                'username': username,
+                                'password': password,
+                            }
                             auth.login(request, user_obj)
                             return Response('success')
                         return HttpResponse("verify_email")
@@ -210,12 +219,15 @@ class ChangePassword(generics.GenericAPIView):
 '''
 Default logout from auth
 '''
-def logout(request):
-    try:
-        auth.logout(request)
-        return render(request, 'accounts/home.html')
-    except Exception:
-        return Response("Something went wrong, please try again later")
+class LogoutView(generics.GenericAPIView):
+
+    def post(self,request):
+        try:
+            auth.logout(request)
+            return render(request, 'accounts/home.html')
+        except Exception:
+            return Response("Something went wrong, please try again later")
+
 
 '''
 Forgot password view

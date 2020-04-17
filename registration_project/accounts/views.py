@@ -227,8 +227,18 @@ Default logout from auth
 '''
 def logout(request):
     try:
-        auth.logout(request)
-        return render(request, 'accounts/home.html')
+        token = redis_object.get('token')
+        # print(token)
+        decode = jwt.decode(token, 'SECRET')
+        username = str(decode['username'])
+        user = User.objects.get(username=username)
+        if user.is_authenticated:
+            redis_object.delete('token')
+            auth.logout(request)
+            # token = redis_object.get('token')
+            # print(token)
+            return render(request, 'accounts/home.html')
+        return HttpResponse('User does not exist')
     except Exception:
         return Response("Something went wrong, please try again later")
 

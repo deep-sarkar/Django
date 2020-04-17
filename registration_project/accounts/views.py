@@ -29,19 +29,22 @@ from django.db.models import Q
 
 from rest_framework.response import Response
 from rest_framework import permissions, generics
+from rest_framework.views import APIView
 
 from .serializers import ( UserRegisterSerializer, UserLoginSerializer, 
                             ResetPasswordSerializer, EmailSerializers )
 from .token_handeler import generate_token
 
 #Custom redis cache
-from .redis_cache import Redis
+import redis
 
 import jwt
 import re
 
+#Redis setting
+redis_object = redis.Redis(host='localhost', port=6379,db=0)
+
 User = get_user_model()
-redis_object = Redis()
 
 
 
@@ -175,6 +178,9 @@ class LoginAPIView(generics.GenericAPIView):
                                 'username': username,
                                 'password': password,
                             }
+                            token = generate_token(payload)
+                            redis_object.set('token',token)
+                            # print('token',token)
                             auth.login(request, user_obj)
                             return Response('success')
                         return HttpResponse("verify_email")
@@ -219,14 +225,12 @@ class ChangePassword(generics.GenericAPIView):
 '''
 Default logout from auth
 '''
-class LogoutView(generics.GenericAPIView):
-
-    def post(self,request):
-        try:
-            auth.logout(request)
-            return render(request, 'accounts/home.html')
-        except Exception:
-            return Response("Something went wrong, please try again later")
+def logout(request):
+    try:
+        auth.logout(request)
+        return render(request, 'accounts/home.html')
+    except Exception:
+        return Response("Something went wrong, please try again later")
 
 
 '''

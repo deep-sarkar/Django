@@ -168,8 +168,8 @@ class LoginAPIView(generics.GenericAPIView):
                     Q(username__iexact=username)|
                     Q(email__iexact=username)
                 )
-                # print(username)
-                # print(password)
+                print(username)
+                print(password)
                 if queryset.count() == 1:
                     user_obj = queryset.first()
                     if user_obj.check_password(password):
@@ -178,9 +178,11 @@ class LoginAPIView(generics.GenericAPIView):
                                 'username': username,
                                 'password': password,
                             }
+                            print(payload)
                             token = generate_token(payload)
-                            redis_object.set('token',token)
-                            # print('token',token)
+                            print('token',token)
+                            redis_object.set(username,token)
+                            print('token',token)
                             auth.login(request, user_obj)
                             return Response('success')
                         return HttpResponse("verify_email")
@@ -227,16 +229,18 @@ Default logout from auth
 '''
 def logout(request):
     try:
-        token = redis_object.get('token')
-        # print(token)
+        username = request.user.username
+        print(str(username))
+        token = redis_object.get(username)
+        print(token)
         decode = jwt.decode(token, 'SECRET')
         username = str(decode['username'])
         user = User.objects.get(username=username)
         if user.is_authenticated:
-            redis_object.delete('token')
+            redis_object.delete(username)
             auth.logout(request)
-            # token = redis_object.get('token')
-            # print(token)
+            token = redis_object.get(username)
+            print(token)
             return render(request, 'accounts/home.html')
         return HttpResponse('User does not exist')
     except Exception:

@@ -168,8 +168,6 @@ class LoginAPIView(generics.GenericAPIView):
                     Q(username__iexact=username)|
                     Q(email__iexact=username)
                 )
-                print(username)
-                print(password)
                 if queryset.count() == 1:
                     user_obj = queryset.first()
                     if user_obj.check_password(password):
@@ -177,12 +175,9 @@ class LoginAPIView(generics.GenericAPIView):
                             payload = {
                                 'username': username,
                                 'password': password,
-                            }
-                            print(payload)
+                                }
                             token = generate_token(payload)
-                            print('token',token)
                             redis_object.set(username,token)
-                            print('token',token)
                             auth.login(request, user_obj)
                             return Response('success')
                         return HttpResponse("verify_email")
@@ -203,7 +198,6 @@ class ChangePassword(generics.GenericAPIView):
         try:
             username = self.request.user.username
             data = request.data
-            print(username)
             new_password = data.get('new_password')
             new_password_confirm = data.get('new_password_confirm')
             if new_password != new_password_confirm :
@@ -230,9 +224,7 @@ Default logout from auth
 def logout(request):
     try:
         username = request.user.username
-        print(str(username))
         token = redis_object.get(username)
-        print(token)
         decode = jwt.decode(token, 'SECRET')
         username = str(decode['username'])
         user = User.objects.get(username=username)
@@ -240,7 +232,6 @@ def logout(request):
             redis_object.delete(username)
             auth.logout(request)
             token = redis_object.get(username)
-            print(token)
             return render(request, 'accounts/home.html')
         return HttpResponse('User does not exist')
     except Exception:

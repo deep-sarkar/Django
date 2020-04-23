@@ -40,12 +40,14 @@ INSTALLED_APPS = [
 
     #Project
     'accounts',
+    'chat',
 
     #Framework
     'rest_framework',
 
     #App
     'django_short_url',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -158,4 +160,18 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
+}
+
+'''
+for socket we have to use asgi routing
+'''
+ASGI_APPLICATION = "registration_project.routing.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }

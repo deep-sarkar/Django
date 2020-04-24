@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+</head>
+<body>
+    <a href="{% url 'home' %}" type="button">Home</a><br>
+    <h2>Hi, {{ user.username }}</h2>
+    <div>
+        <h4>Create Room</h4>
+        <form action="chat/create_room" method="POST">
+            {% csrf_token %}
+            Room Name : <input type="text" name="room_name" id="room_name" maxlength="20" required><br>
+            <button type="submit">Create</button>
+        </form>
+    </div>
+
+    <div>
+        <h4>Join Existing Room</h4>
+        <form action="chat/join" method="POST">
+            {% csrf_token %}
+            Room Name : <input type="text" name="join_room" id="join_room" id="join_room" required><br>
+            <button type="submit">Join</button>
+        </form>
+    </div>
+
+    <div>
+        <h4> Delete Room </h4>
+        <form action="chat/delete_room" method="POST" >
+            {% csrf_token %}
+            Room Name : <input type="text" name="delete_room" id="delete_room" required><br>
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+</body>
+</html>

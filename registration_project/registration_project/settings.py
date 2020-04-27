@@ -91,7 +91,7 @@ Postgres SQL settings
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'postgres2',
         'USER': 'postgres',
         'PASSWORD': 'password',
         'HOST': '127.0.0.1',

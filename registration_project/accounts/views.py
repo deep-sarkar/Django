@@ -231,7 +231,6 @@ def logout(request):
         if user.is_authenticated:
             redis_object.delete(username)
             auth.logout(request)
-            token = redis_object.get(username)
             return render(request, 'accounts/home.html')
         return HttpResponse('User does not exist')
     except Exception:

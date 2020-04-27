@@ -1,49 +1,154 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
+	<title>Room</title>
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ room_name|json_script:"room-name" }}
-    <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
-        const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
-        );
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-        chatSocket.onmessage = function(chat) {
-            const data = JSON.parse(chat.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
-        };
+	<div>
+	{% csrf_token %}
 
-        chatSocket.onclose = function(unexpectedError) {
-            console.error('Chat socket closed unexpectedly');
-        };
+		{% if isOwner %}
 
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(enterKey) {
+			<div style="float: right; padding-top: 0px; margin-top: 0px; width: 25%">
+				<h3 style="margin-top: 0px;">Pending approvals</h3>
+
+				<div class="pending_requests" style="margin-right: 6px; display: block; border: 1px solid green; border-radius: 4px; height: 440px; padding: 5px;">
+					
+				</div>
+
+			</div>
+
+			<script type="text/javascript">
+
+				var room_name = "{{ room_name }}";
+		
+				var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+				function csrfSafeMethod(method) {
+			      	// these HTTP methods do not require CSRF protection
+			      	return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+				}
+
+				$(window).on("load", function () {
+					var data = JSON.stringify({'room_name': room_name});
+					console.log(data);
+		          	$.ajax({
+				      	beforeSend: function(xhr, settings) {
+				          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				            	xhr.setRequestHeader("X-CSRFToken", csrftoken);
+				          	}
+				      	},
+				      	url: "/chat/pending_request/",
+				      	type: "POST",
+				      	data: data,
+				      	cache: false,
+				      	processData: false,
+				      	contentType: false,
+				      	success: function(data) {
+				        	// console.log(data);
+				        	var pending = data['data'];
+				        	for (item in pending) {
+
+				        		$(".pending_requests").append("<div>" + pending[item] + "&nbsp<button class='approve' id='" + pending[item] + "'>Approve</button></div><br>");
+				        	}
+				      	},
+				      	error: function(data) {
+
+				      	}
+				    });
+
+		          	$(document).on("click", ".approve", function () {
+		          		var username = $(this).attr("id");
+		          		var that = $(this);
+		          		console.log(email);
+		          		$.ajax({
+					      	beforeSend: function(xhr, settings) {
+					          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+					            	xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					          	}
+					      	},
+					      	url: "/chat/approve_request/",
+					      	type: "POST",
+					      	data: JSON.stringify({'room_name': room_name, 'member': username}),
+					      	cache: false,
+					      	processData: false,
+					      	contentType: false,
+					      	success: function(data) {
+					        	console.log(data);
+					        	$(that).parent().remove();
+					      	},
+					      	error: function(data) {
+
+					      	}
+					    });
+		          	});
+
+		        });
+
+			</script>
+
+		{% endif %}
+
+		<h3>Room Name - {{ room_name }}</h3>
+
+		<div style="display: block; border: 1px solid grey; border-radius: 4px; height: 440px; width: 281px; overflow: auto;">
+
+			<div class="chat" style="border: 1px solid grey; border-radius: 4px; height: 350px; width: 96%; margin: 4px;">
+				
+			</div>
+
+			<div style="margin-left: 6px;">
+				<textarea class="message" rows="3" cols="35"></textarea>
+				<button type="button" class="post" style="float: right; margin-right: 6px;">send</button>
+			</div>
+
+		</div><br>
+		<a href="/chat/go_to_home/" type="button" class="button">Go Back</a>
+
+	</div>
+
+	<script type="text/javascript">
+		var room_name = "{{ room_name }}";
+
+		var user = "{{ request.user.username }}";
+
+		var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + room_name + '/');
+
+		chatSocket.onmessage = function(e) {
+          	var data = (JSON.parse(e.data));
+          	var msg = data['message'];
+          	var whoami = data['user'];
+          	var msg_element = "";
+          	if (whoami == user) {
+          		msg_element = "<div style=' margin: 4px; padding: 3px; margin-left: 12em; border: 1px solid green; border-radius: 3px; background-color: darkgreen; color: white;'>" +"you"+" : "+ msg + "</div>";
+          	} else {
+          		msg_element = "<div style='margin: 4px; padding: 3px; margin-right: 12em; border: 1px solid darkred; border-radius: 3px; background-color: darkred; color: white;'>" +whoami+" : "+ msg + "</div>";
+          	}
+          	$(".chat").append(msg_element);
+        }
+
+        chatSocket.onclose = function(e) {
+        	console.error('Chat socket closed unexpectedly');
+      	}
+        document.querySelector('.message').focus();
+        document.querySelector('.message').onkeyup = function(enterKey) {
             if (enterKey.keyCode === 13) {  
-                document.querySelector('#chat-message-submit').click();
+                document.querySelector('.post').click();
             }
         };
 
-        document.querySelector('#chat-message-submit').onclick = function(submit) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-            messageInputDom.value = '';
-        };
-    </script>
+      	$(document).on("click", ".post", function () {
+      		var msg = $(".message").val();
+      		chatSocket.send(JSON.stringify({
+            	'message': msg,
+            	'user': user
+        	}));
+        	$(".message").val("");
+      	});
+
+	</script>
+
 </body>
 </html>

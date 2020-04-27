@@ -27,3 +27,24 @@ def create_room(request):
 			'message':'Room with this name already exists, please try with different name'
 		})
 
+def delete_room(request):
+	room_name = request.POST.get('delete_room')
+	username = request.user.username
+	queryset = GroupChat.objects.filter(room_name=room_name)
+	if queryset.count() != 1:
+		return render(request, 'chat/room_general_message.html',{
+			'message':'Room does not exixts...'
+		})
+	
+	else:
+		if queryset[0].owner != username:
+			return render(request, 'chat/room_general_message.html',{
+			'message':'You are not authorised to delete this room...'
+		})
+
+		else:
+			queryset.delete()
+			return render(request, 'chat/room_general_message.html',{
+				'message':'Room Deleted..'
+			})
+

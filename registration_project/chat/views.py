@@ -48,3 +48,39 @@ def delete_room(request):
 				'message':'Room Deleted..'
 			})
 
+def join_room(request):
+	room_name = request.POST.get('join_room')
+	username  = request.user.username
+	queryset  = GroupChat.objects.filter(room_name=room_name)
+
+	if queryset.count() != 1:
+		return render(request, 'chat/room_general_message.html',{
+			'message':'Room does not exists!!!!'
+		})
+	else:
+		if queryset[0].owner == username:
+			isOwner = True
+			return render(request,'chat/room.html',{
+				'room_name':room_name,
+				'isOwner':isOwner
+			})
+		else:
+			isOwner = False
+			member  = GroupMembers.objects.filter(room_name=room_name, member=username)
+
+			if member.count() == 0:
+				GroupMembers.objects.create(room_name=room_name, member=username,isAuthorised=False)
+				return render(request,'chat/room_general_message.html',{
+					'message':'You are not a member of this group. Joining request hsa been sent to admin'
+				})
+			else:
+				if member[0].isAuthorised:
+					return render(request, 'chat/room.html',{
+						'room_name':room_name,
+						'isOwner':isOwner
+					})
+				else:
+					return render(request, 'chat/room_general_message.html',{
+						'message':'Your request to join has not been approved yet.'
+					})
+

@@ -84,3 +84,30 @@ def join_room(request):
 						'message':'Your request to join has not been approved yet.'
 					})
 
+def pending_request(request):
+	username    	  = request.user.username
+	request_body_data = request.body.decode('utf-8')
+	body_data 		  = json.loads(request_body_data)
+	room_name 		  = body_data['room_name']
+
+	unAuthorised_members = GroupMembers.objects.filter(room_name=room_name, isAuthorised=False)
+	pending_request  	 = [group.member for name, group in enumerate(unAuthorised_members)]
+
+	response_data = {
+		'data': pending_request
+	}
+	return JsonResponse(response_data)
+
+def approve_request(request):
+	username = request.user.username
+	request_body_data = request.body.decode('utf-8')
+	body_data 		  = json.loads(request_body_data)
+	room_name 		  = body_data['room_name']
+	requested_user	  = body_data['member']
+	
+	GroupMembers.objects.filter(room_name=room_name, member=requested_user).update(isAuthorised=True)
+
+	response_data = {
+		'status_code':200,
+	}
+	return JsonResponse(response_data)

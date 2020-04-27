@@ -10,7 +10,7 @@
     <h2>Hi, {{ user.username }}</h2>
     <div>
         <h4>Create Room</h4>
-        <form action="chat/create_room" method="POST">
+        <form action="create_room/" method="POST">
             {% csrf_token %}
             Room Name : <input type="text" name="room_name" id="room_name" maxlength="20" required><br>
             <button type="submit">Create</button>
@@ -19,7 +19,7 @@
 
     <div>
         <h4>Join Existing Room</h4>
-        <form action="chat/join" method="POST">
+        <form action="join_room/" method="POST">
             {% csrf_token %}
             Room Name : <input type="text" name="join_room" id="join_room" id="join_room" required><br>
             <button type="submit">Join</button>
@@ -28,7 +28,7 @@
 
     <div>
         <h4> Delete Room </h4>
-        <form action="chat/delete_room" method="POST" >
+        <form action="delete_room/" method="POST" >
             {% csrf_token %}
             Room Name : <input type="text" name="delete_room" id="delete_room" required><br>
             <button type="submit">Delete</button>

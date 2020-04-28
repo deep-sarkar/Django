@@ -1,11 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render,HttpResponse
 from django.http import JsonResponse
 
-from . models import GroupChat, GroupMembers
+from .models import GroupChat, GroupMembers
 import json
 
+
+from django.template.loader import TemplateDoesNotExist
+
 def chat_home(request):
-    return render(request, 'chat/chat_home.html')
+        return render(request, 'chat/chat_home.html')
+
 
 
 def create_room(request):
@@ -85,7 +89,6 @@ def join_room(request):
 					})
 
 def pending_request(request):
-	username    	  = request.user.username
 	request_body_data = request.body.decode('utf-8')
 	body_data 		  = json.loads(request_body_data)
 	room_name 		  = body_data['room_name']
@@ -99,7 +102,6 @@ def pending_request(request):
 	return JsonResponse(response_data)
 
 def approve_request(request):
-	username = request.user.username
 	request_body_data = request.body.decode('utf-8')
 	body_data 		  = json.loads(request_body_data)
 	room_name 		  = body_data['room_name']

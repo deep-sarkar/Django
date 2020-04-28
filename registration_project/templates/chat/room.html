@@ -62,7 +62,6 @@
 		          	$(document).on("click", ".approve", function () {
 		          		var username = $(this).attr("id");
 		          		var that = $(this);
-		          		console.log(email);
 		          		$.ajax({
 					      	beforeSend: function(xhr, settings) {
 					          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -93,9 +92,9 @@
 
 		<h3>Room Name - {{ room_name }}</h3>
 
-		<div style="display: block; border: 1px solid grey; border-radius: 4px; height: 440px; width: 281px; overflow: auto;">
+		<div style="display: block; border: 1px solid grey; border-radius: 4px; height: 440px; width: 281px; overflow: scroll">
 
-			<div class="chat" style="border: 1px solid grey; border-radius: 4px; height: 350px; width: 96%; margin: 4px;">
+			<div class="chat" style="border: 1px solid grey; border-radius: 4px; height: 350px; width: 96%; margin: 4px; overflow: scroll">
 				
 			</div>
 

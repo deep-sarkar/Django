@@ -1,3 +1,4 @@
 __pycache__
 migrations/*
 .vscode
+p2pchat/__pycache__

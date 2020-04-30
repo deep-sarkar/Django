@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     #Project
     'accounts',
     'chat',
+    'p2pchat',
 
     #Framework
     'rest_framework',

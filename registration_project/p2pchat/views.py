@@ -14,3 +14,12 @@ User = get_user_model()
 def p2phome(request):
     return render(request, 'p2p/home.html')
 
+def contact_list(request):
+    username     = request.user.username
+    queryset = User.objects.exclude(username=username)
+    all_contacts = [item.username for name, item in enumerate(queryset)]
+    response_data = {
+		'data': all_contacts
+    }
+    return JsonResponse(response_data)
+

@@ -1,0 +1,83 @@
+<head>
+    <meta charset="UTF-8">
+    <title>chat</title>
+</head>
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <div>
+        {% csrf_token %}
+            <!-- Contact List division -->
+            <div style="float: right; padding-top: 0px; margin-top: 0px; width: 14%">
+                <h3 style="margin-top: 0px;">Contact List</h3>
+    
+                <div class="contact_list" style="margin-right: 6px; display: block; border: 1px solid green; border-radius: 4px; height: 440px; padding: 5px;">
+                    
+                </div>
+
+            </div>
+    
+            <script type="text/javascript">
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                function csrfSafeMethod(method) {
+                      // these HTTP methods do not require CSRF protection
+                      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                }
+
+                $(window).on("load", function () {
+                    var username = "{{ request.user.username }}"
+                    var data = JSON.stringify({'username': username});
+                    // console.log(data);
+                    $.ajax({
+                        beforeSend: function(xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                        },
+                        url: "/p2pchat/contact_list/",
+                        type: "POST",
+                        data: data,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function(data) {
+                          var contact = data['data'];
+                          for (item in contact) {
+                              $(".contact_list").append("<div>" + contact[item] + "&nbsp<button class='chat' id='" + contact[item] + "'>Chat</button></div><br>");
+                          }
+                        },
+                        error: function(data) {
+                        }
+                    });
+                });
+                
+                $(document).on("click",".chat", function(){
+                    var receiver = $(this).attr("id");
+                    var data = JSON.stringify({ 'receiver': receiver });
+                    $.ajax({
+					      	beforeSend: function(xhr, settings) {
+					          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+					            	xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					          	}
+					      	},
+					      	url: "/p2pchat/get_stream/",
+					      	type: "POST",
+					      	data: data,
+					      	cache: false,
+					      	processData: false,
+					      	contentType: false,
+					      	success: function(data) {
+                                var stream = data["data"]
+                                console.log(stream)
+                                window.location= "chat_room/" + encodeURIComponent(stream);
+					      	},
+					      	error: function(data) {
+
+					      	}
+					    });
+		          	});
+
+            </script>
+    </div>
+    
+</body>
+</html>

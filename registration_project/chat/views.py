@@ -1,5 +1,6 @@
 from django.shortcuts import render,HttpResponse
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 from .models import GroupChat, GroupMembers
 import json
@@ -7,14 +8,20 @@ import json
 
 from django.template.loader import TemplateDoesNotExist
 
+
+@login_required(login_url='/login/')
 def chat_home(request):
-        return render(request, 'chat/chat_home.html')
-
-
+	try:
+		return render(request, 'chat/chat_home.html')
+	except TemplateDoesNotExist:
+		return HttpResponse("Getting some issue in fetching data. Please try again later.")
 
 def create_room(request):
-	room_name = request.POST.get('room_name')
-	username = request.user.username
+	try:
+		room_name = request.POST.get('room_name')
+		username = request.user.username
+	except ValueError:
+		return HttpResponse("Please enter a value in room name")
 	queryset = GroupChat.objects.filter(room_name=room_name)
 
 	if queryset.count() == 0:
@@ -32,7 +39,10 @@ def create_room(request):
 		})
 
 def delete_room(request):
-	room_name = request.POST.get('delete_room')
+	try:
+		room_name = request.POST.get('delete_room')
+	except ValueError:
+		return HttpResponse("Please enter a correct value in room name")
 	username = request.user.username
 	queryset = GroupChat.objects.filter(room_name=room_name)
 	if queryset.count() != 1:
@@ -53,7 +63,10 @@ def delete_room(request):
 			})
 
 def join_room(request):
-	room_name = request.POST.get('join_room')
+	try:
+		room_name = request.POST.get('join_room')
+	except ValueError:
+		return HttpResponse("Please enter a value in room name")
 	username  = request.user.username
 	queryset  = GroupChat.objects.filter(room_name=room_name)
 
@@ -89,8 +102,11 @@ def join_room(request):
 					})
 
 def pending_request(request):
-	request_body_data = request.body.decode('utf-8')
-	body_data 		  = json.loads(request_body_data)
+	try:
+		request_body_data = request.body.decode('utf-8')
+		body_data 		  = json.loads(request_body_data)
+	except json.JSONDecodeError:
+		return HttpResponse("Getting issue in loading request, please try again later")
 	room_name 		  = body_data['room_name']
 
 	unAuthorised_members = GroupMembers.objects.filter(room_name=room_name, isAuthorised=False)
@@ -102,8 +118,11 @@ def pending_request(request):
 	return JsonResponse(response_data)
 
 def approve_request(request):
-	request_body_data = request.body.decode('utf-8')
-	body_data 		  = json.loads(request_body_data)
+	try:
+		request_body_data = request.body.decode('utf-8')
+		body_data 		  = json.loads(request_body_data)
+	except json.JSONDecodeError:
+		return HttpResponse("Getting issue in approve request, please try again later")
 	room_name 		  = body_data['room_name']
 	requested_user	  = body_data['member']
 	

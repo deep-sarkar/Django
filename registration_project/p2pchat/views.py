@@ -51,5 +51,16 @@ def chat_room(request, stream):
         "stream":stream_name
     })
 
-
+def save_message(request):
+    body_data    = json.loads(request.body.decode('utf-8'))
+    user         = body_data['user']
+    message      = body_data['message']
+    stream       = body_data['stream']
+    other_user   = stream.replace(user,'')
+    message_obj  = Message.objects.create(sender=user, receiver=other_user, stream=stream, body=message)
+    message_obj.save()
+    response_data = {
+        'status_code': 200
+    }
+    return JsonResponse(response_data)
 

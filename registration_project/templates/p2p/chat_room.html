@@ -23,6 +23,8 @@
                     // these HTTP methods do not require CSRF protection
                     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
                 }
+               
+
                 var stream = "{{ stream }}";
                 // console.log(stream)
                 var user = "{{ request.user.username }}";
@@ -30,16 +32,19 @@
                 var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + stream + '/');
         
                 chatSocket.onmessage = function(e) {
-                      var data = (JSON.parse(e.data));
-                      var msg = data['message'];
-                      var whoami = data['user'];
-                      var msg_element = "";
-                      if (whoami == user) {
-                          msg_element = "<div style=' margin: 4px; padding: 3px; margin-left: 12em; border: 1px solid green; border-radius: 3px; background-color: darkgreen; color: white;'>" +"you"+" : "+ msg + "</div>";
-                      } else {
-                          msg_element = "<div style='margin: 4px; padding: 3px; margin-right: 12em; border: 1px solid darkred; border-radius: 3px; background-color: darkred; color: white;'>" +whoami+" : "+ msg + "</div>";
-                      }
-                      $(".chat").append(msg_element);
+                    var user = "{{ request.user.username }}";
+                    var data = (JSON.parse(e.data));
+                    var msg = data['message'];
+                    var whoami = data['user'];
+                    console.log('whoami',whoami);
+                    console.log('user',user)
+                    var msg_element = "";
+                    if (whoami == user) {
+                        msg_element = "<div style=' margin: 4px; padding: 3px; margin-left: 12em; border: 1px solid green; border-radius: 3px; background-color: darkgreen; color: white;'>" +"you"+" : "+ msg + "</div>";
+                    } else {
+                        msg_element = "<div style='margin: 4px; padding: 3px; margin-right: 12em; border: 1px solid darkred; border-radius: 3px; background-color: darkred; color: white;'>" +whoami+" : "+ msg + "</div>";
+                    }
+                    $(".chat").append(msg_element);
                 }
         
                 chatSocket.onclose = function(e) {
@@ -54,6 +59,7 @@
         
                 $(document).on("click", ".post", function () {
                       var msg = $(".message").val();
+                      var user = "{{ request.user.username }}";
                       var data = JSON.stringify({
                         'message': msg,
                         'user': user,
@@ -82,6 +88,48 @@
 					    });
                     $(".message").val("");
                   });
+
+                  $(window).on("load", function () {
+					var data = JSON.stringify({'stream': stream});
+					// console.log(data);
+		          	$.ajax({
+				      	beforeSend: function(xhr, settings) {
+				          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				            	xhr.setRequestHeader("X-CSRFToken", csrftoken);
+				          	}
+				      	},
+				      	url: "/p2pchat/get_message/",
+				      	type: "POST",
+				      	data: data,
+				      	cache: false,
+				      	processData: false,
+				      	contentType: false,
+				      	success: function(data) {
+                            var user = "{{ reques.user.username }}";
+                            console.log('user1',user);
+				        	var messages = data['data'];
+                            var user     = String(data['user']);
+                            // console.log(messages);
+				        	messages.forEach(element => {
+                                
+                                var sender = String(element[0]);
+                                var message = String(element[1]);
+                                console.log('user',user);
+                                console.log('sender',sender);
+                                console.log('message',message)
+                                if (user == sender){
+                                    msg_element = "<div style=' margin: 4px; padding: 3px; margin-left: 12em; border: 1px solid green; border-radius: 3px; background-color: darkgreen; color: white;'>" +"you"+" : "+ message + "</div>";
+                                }else{
+                                    msg_element = "<div style='margin: 4px; padding: 3px; margin-right: 12em; border: 1px solid darkred; border-radius: 3px; background-color: darkred; color: white;'>" +sender+" : "+ message + "</div>";
+                                }
+                                $(".chat").append(msg_element);
+                            });
+				      	},
+				      	error: function(data) {
+
+				      	}
+				    });
+                });
             </script>
         
 </body>

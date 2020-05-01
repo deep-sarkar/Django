@@ -18,8 +18,13 @@
             </div>
 
             <script type="text/javascript">
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                function csrfSafeMethod(method) {
+                    // these HTTP methods do not require CSRF protection
+                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                }
                 var stream = "{{ stream }}";
-                console.log(stream)
+                // console.log(stream)
                 var user = "{{ request.user.username }}";
         
                 var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + stream + '/');
@@ -47,24 +52,36 @@
                     }
                 };
         
-                  $(document).on("click", ".post", function () {
+                $(document).on("click", ".post", function () {
                       var msg = $(".message").val();
-                      chatSocket.send(JSON.stringify({
+                      var data = JSON.stringify({
                         'message': msg,
-                        'user': user
-                    }));
-                    $(".message").val("");
-                  });
+                        'user': user,
+                        'stream':stream,
+                    })
+                    console.log('data',data)
+                    chatSocket.send(data); //sending message to chatsocket
+                    $.ajax({
+					      	beforeSend: function(xhr, settings) {
+					          	if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+					            	xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					          	}
+					      	},
+					      	url: "/p2pchat/save_message/",
+					      	type: "POST",
+					      	data: data,
+					      	cache: false,
+					      	processData: false,
+					      	contentType: false,
+					      	success: function(data) {
+					        	console.log(data);
+					      	},
+					      	error: function(data) {
 
-                  $(document).on("click", ".post", function () {
-                      var msg = $(".message").val();
-                      var data = (JSON.stringify({
-                        'message': msg,
-                        'user': user
-                    }));
+					      	}
+					    });
                     $(".message").val("");
                   });
-        
             </script>
         
 </body>

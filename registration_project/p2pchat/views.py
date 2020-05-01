@@ -64,3 +64,15 @@ def save_message(request):
     }
     return JsonResponse(response_data)
 
+def get_message(request):
+    username = request.user.username
+    body_data    = json.loads(request.body.decode('utf-8'))
+    stream       = body_data['stream']
+    messages     = Message.objects.filter(stream=stream)
+    all_message  = [[item.sender,item.body] for message, item in enumerate(messages)]
+    response_data = {
+        "data":all_message,
+        "user": username
+    }
+    return JsonResponse(response_data)
+

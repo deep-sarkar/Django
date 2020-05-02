@@ -9,7 +9,7 @@ import json
 '''
 Exceptions
 '''
-from .exceptions import EmptyMessageError
+from .exceptions import EmptyMessageError, EmptyContactListError
 
 
 
@@ -25,6 +25,8 @@ def p2phome(request):
 def contact_list(request):
     username      = request.user.username
     queryset      = User.objects.exclude(username=username)
+    if queryset.count() == 0:
+        raise EmptyContactListError("You dont ahve any contact in your contact list.")
     all_contacts  = [item.username for name, item in enumerate(queryset)]
     response_data = {
 		'data': all_contacts

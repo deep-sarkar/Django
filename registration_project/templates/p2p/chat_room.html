@@ -106,7 +106,7 @@
 				      	contentType: false,
 				      	success: function(data) {
                             var user = "{{ reques.user.username }}";
-                            console.log('user1',user);
+                            // console.log('user1',user);
 				        	var messages = data['data'];
                             var user     = String(data['user']);
                             // console.log(messages);
@@ -114,9 +114,9 @@
                                 
                                 var sender = String(element[0]);
                                 var message = String(element[1]);
-                                console.log('user',user);
-                                console.log('sender',sender);
-                                console.log('message',message)
+                                // console.log('user',user);
+                                // console.log('sender',sender);
+                                // console.log('message',message)
                                 if (user == sender){
                                     msg_element = "<div style=' margin: 4px; padding: 3px; margin-left: 12em; border: 1px solid green; border-radius: 3px; background-color: darkgreen; color: white;'>" +"you"+" : "+ message + "</div>";
                                 }else{

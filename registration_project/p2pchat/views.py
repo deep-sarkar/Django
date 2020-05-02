@@ -33,8 +33,11 @@ def contact_list(request):
 
 def get_stream(request):
     username     = request.user.username
-    body_data    = json.loads(request.body.decode('utf-8'))
-    receiver     = body_data['receiver']
+    try:
+        body_data    = json.loads(request.body.decode('utf-8'))
+        receiver     = body_data['receiver']
+    except json.JSONDecodeError:
+        return HttpResponse("Something went wrong. Please try after sometime.")
     queryset     = Message.objects.filter(sender=username, receiver=receiver)
     if queryset.count() == 0:
         queryset     = Message.objects.filter(sender = receiver, receiver = username)
@@ -79,8 +82,11 @@ def save_message(request):
 
 def get_message(request):
     username     = request.user.username
-    body_data    = json.loads(request.body.decode('utf-8'))
-    stream       = body_data['stream']
+    try:
+        body_data    = json.loads(request.body.decode('utf-8'))
+        stream       = body_data['stream']
+    except json.JSONDecodeError:
+        return HttpResponse("Getting some issue in fetching message. Please try after sometime.")
     messages     = Message.objects.filter(stream=stream)
     all_message  = [[item.sender,item.body] for message, item in enumerate(messages)]
     response_data = {

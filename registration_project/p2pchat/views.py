@@ -113,11 +113,13 @@ def get_message(request):
         stream       = body_data['stream']
     except json.JSONDecodeError:
         return HttpResponse("Getting some issue in fetching message. Please try after sometime.")
-    messages     = Message.objects.filter(stream=stream)
-    all_message  = [[item.sender,item.body] for message, item in enumerate(messages)]
-    response_data = {
-        "data":all_message,
-        "user": username
-    }
-    return JsonResponse(response_data)
+    if username in stream:
+        messages     = Message.objects.filter(stream=stream)
+        all_message  = [[item.sender,item.body] for message, item in enumerate(messages)]
+        response_data = {
+            "data":all_message,
+            "user": username
+        }
+        return JsonResponse(response_data)
+    return HttpResponse("Invalid request")
 

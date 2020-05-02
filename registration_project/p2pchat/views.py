@@ -86,7 +86,7 @@ save_message() will fetch message from frontend and save it to django database.
 '''
 def save_message(request):
     try:
-        body_data    = json.loads(request.body.decode('utf-8'))
+        body_data    = json.loads(request.body.decode('utf-8')) #Fetching data from front-end in json formate 
         user         = body_data['user']
         message      = body_data['message']
         stream       = body_data['stream']
@@ -109,7 +109,7 @@ in json form.
 def get_message(request):
     username     = request.user.username
     try:
-        body_data    = json.loads(request.body.decode('utf-8'))
+        body_data    = json.loads(request.body.decode('utf-8')) #Fetching data from front-end in json formate
         stream       = body_data['stream']
     except json.JSONDecodeError:
         return HttpResponse("Getting some issue in fetching message. Please try after sometime.")

@@ -2,9 +2,17 @@ from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 
-from .models import Message
+from .models import Message 
 from django.contrib.auth.decorators import login_required
 import json
+
+'''
+Exceptions
+'''
+from .exceptions import EmptyMessageError
+
+
+
 
 
 User = get_user_model()
@@ -57,6 +65,8 @@ def save_message(request):
     message      = body_data['message']
     stream       = body_data['stream']
     other_user   = stream.replace(user,'')
+    if message == "":
+        raise EmptyMessageError("Message body is empty")
     message_obj  = Message.objects.create(sender=user, receiver=other_user, stream=stream, body=message)
     message_obj.save()
     response_data = {
@@ -65,7 +75,7 @@ def save_message(request):
     return JsonResponse(response_data)
 
 def get_message(request):
-    username = request.user.username
+    username     = request.user.username
     body_data    = json.loads(request.body.decode('utf-8'))
     stream       = body_data['stream']
     messages     = Message.objects.filter(stream=stream)

@@ -33,7 +33,7 @@ def contact_list(request):
     }
     return JsonResponse(response_data)
 
-def get_stream(request):
+def get_or_create_stream(request):
     username     = request.user.username
     try:
         body_data    = json.loads(request.body.decode('utf-8'))

@@ -60,11 +60,14 @@ def chat_room(request, stream):
     })
 
 def save_message(request):
-    body_data    = json.loads(request.body.decode('utf-8'))
-    user         = body_data['user']
-    message      = body_data['message']
-    stream       = body_data['stream']
-    other_user   = stream.replace(user,'')
+    try:
+        body_data    = json.loads(request.body.decode('utf-8'))
+        user         = body_data['user']
+        message      = body_data['message']
+        stream       = body_data['stream']
+        other_user   = stream.replace(user,'')
+    except json.JSONDecodeError:
+        return HttpResponse("Getting some problem to save data.")
     if message == "":
         raise EmptyMessageError("Message body is empty")
     message_obj  = Message.objects.create(sender=user, receiver=other_user, stream=stream, body=message)
